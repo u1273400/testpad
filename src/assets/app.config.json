@@ -1,0 +1,5 @@
+{
+  "islocalhost":true,
+  "lurl":"http://localhost:8082/api/",
+  "rurl":"https://gaia.hud.ac.uk:8082/api/"
+}
