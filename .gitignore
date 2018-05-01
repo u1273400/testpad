@@ -13,6 +13,8 @@ log.txt
 npm-debug.log*
 src/app/app.config.json
 wbiblecore/mockup/coding_tutorial/
+wbiblecore/bin/
+wbiblecore/obj/
 .idea/
 .sourcemaps/
 .sass-cache/
