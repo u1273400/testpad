@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { IonicPage, NavController, NavParams } from 'ionic-angular';
-import { DatasvcProvider } from '../../providers/datasvc/datasvc';
+import { DatasvcProvider, User } from '../../providers/datasvc/datasvc';
 
 /**
  * Generated class for the WelcomePage page.
@@ -16,7 +16,8 @@ import { DatasvcProvider } from '../../providers/datasvc/datasvc';
 })
 export class WelcomePage {
 
-
+  usernames:User[];
+  emails:string[];
 
   constructor(private ds:DatasvcProvider, public navCtrl: NavController, public navParams: NavParams) {
     //this.ds.getData('https://jsonplaceholder.typicode.com/posts').subscribe((data)=>{
@@ -24,8 +25,9 @@ export class WelcomePage {
         ds.baseurl=data.islocalhost?data.lurl:data.rurl;
         this.ds.getData(ds.baseurl+'allusers').subscribe((data)=>{
             console.log(data);
-          });
-    });  
+            this.usernames=data;
+        });
+    });
   }
 
   ionViewDidLoad() {
@@ -37,3 +39,4 @@ export class WelcomePage {
   }
 
 }
+

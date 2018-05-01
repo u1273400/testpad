@@ -12,12 +12,6 @@ log.txt
 .vscode/
 npm-debug.log*
 src/app/app.config.json
-<<<<<<< HEAD
-wbiblecore/mockup/coding_tutorial/
-wbiblecore/bin/
-wbiblecore/obj/
-=======
->>>>>>> 342baf4923c3973b3b93afce4f1eea202d84fdf0
 .idea/
 .ant/
 .sourcemaps/

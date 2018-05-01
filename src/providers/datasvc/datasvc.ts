@@ -23,5 +23,11 @@ export class DatasvcProvider {
     return this.http.get(feedUrl).map(res => res.json());
   }
 
+}
 
+export interface User{
+  userid:string,
+  email:string,
+  hash:string,
+  active:boolean
 }
