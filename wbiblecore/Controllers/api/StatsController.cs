@@ -50,7 +50,7 @@ namespace wbible.Controllers.api
             //Console.WriteLine("here");
             return Ok(db.Users);
         }
-        
+
        [HttpGet("api/allbooks")]
         public IActionResult GetStats()
         {
@@ -58,7 +58,7 @@ namespace wbible.Controllers.api
             //var bookids =(from xx in db.Corpus select xx.BookStatsId).Distinct().ToList();
             IQueryable<BookStats> stats = from stat in db.Stats join book in db.Corpus on stat.BookStatsId equals book.BookStatsId select stat ;
             var res = from x in stats.Distinct() orderby x.BookStatsId ascending
-            select new  { BookStatsId = x.BookStatsId, BookCode = x.BookCode, 
+            select new  { BookStatsId = x.BookStatsId, BookCode = x.BookCode,
             pc=db.Corpus.Count(e => e.BookStatsId==x.BookStatsId && String.IsNullOrEmpty(e.PText))*1.0 /
             x.VerseCount*100
              };
@@ -73,7 +73,7 @@ namespace wbible.Controllers.api
             //Console.WriteLine($"id={id}");
             var chapts = (from xx in db.Corpus where xx.BookStatsId==id select xx.Chapt).Distinct();
             //var v = (from xx in db.Stats where xx.BookStatsId==id select xx.VerseCount).SingleOrDefault();
-            var res=(from x in chapts orderby x ascending select new {chapt=x, 
+            var res=(from x in chapts orderby x ascending select new {chapt=x,
             pc=db.Corpus.Count(c => c.BookStatsId==id && !String.IsNullOrEmpty(c.PText) && c.Chapt==x)*1.0/
             db.Corpus.Count(c => c.BookStatsId==id && c.Chapt==x) *100
             });
@@ -92,7 +92,8 @@ namespace wbible.Controllers.api
         {
             Console.WriteLine($"id={id} chapt={chapt}");
             //return Ok();
-            var v = (from xx in db.Corpus where xx.BookStatsId==id && xx.Chapt==chapt && xx.Verified==false orderby xx.Verse ascending select xx);
+            //var v = (from xx in db.Corpus where xx.BookStatsId==id && xx.Chapt==chapt && (xx.Verified == 0 || xx.Verified == null) orderby xx.Verse ascending select xx);
+            var v = (from xx in db.Corpus where xx.BookStatsId==id && xx.Chapt==chapt orderby xx.Verse ascending select xx);
             if (v == null)
             {
                 return NotFound();
@@ -180,12 +181,12 @@ namespace wbible.Controllers.api
         //     return CreatedAtRoute("DefaultApi", new { id = song.Id }, song);
         // }
 
-        // DELETE: api/delete
+        // DELETE: api/delete/
         [HttpDelete("api/delete")]
-        public IActionResult DeleteVerse(long id)
+        public IActionResult DeleteVerse(int id)
         {
             Corpus v = db.Corpus.Find(id);
-            Console.WriteLine($"StatsController.DeleteVerse(?): id={id} text={v} isnull="+(v==null?"true":"false"));
+            Console.WriteLine($"StatsController.DeleteVerse(?): id={id} text={v.PText} isnull="+(v==null?"true":"false"));
             if (v == null)
             {
                 return NotFound();
