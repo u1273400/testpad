@@ -19,7 +19,7 @@ export class DatasvcProvider {
   }
   public ngOnInit(){
   }
-  public getData(feedUrl){
+  public getData(feedUrl:string):Observable<any>{
     return this.http.get(feedUrl).map(res => res.json());
   }
 
@@ -29,5 +29,6 @@ export interface User{
   userid:string,
   email:string,
   hash:string,
-  active:boolean
+  active:boolean,
+  role:number
 }

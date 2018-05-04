@@ -18,6 +18,9 @@ export class WelcomePage {
 
   usernames:User[];
   emails:string[];
+  email:string;
+  username:string;
+  ustyle:string;
 
   constructor(private ds:DatasvcProvider, public navCtrl: NavController, public navParams: NavParams) {
     //this.ds.getData('https://jsonplaceholder.typicode.com/posts').subscribe((data)=>{
@@ -28,6 +31,7 @@ export class WelcomePage {
             this.usernames=data;
         });
     });
+    this.username="Please enter your user name"
   }
 
   ionViewDidLoad() {
@@ -35,7 +39,10 @@ export class WelcomePage {
   }
 
   loginOrAn(){
-    window.location.href="https://selene.hud.ac.uk/u1273400/www/vwbibled";
+    console.log('continue')
+    this.ustyle="red"
+    //window.location.href="https://selene.hud.ac.uk/u1273400/www/vwbibled";
+
   }
 
 }
