@@ -20,11 +20,11 @@
 <ion-label >Enter Your User name</ion-label>
 <ion-input type="text" [(ngModel)]="username" [ngStyle]="{'color':ustyle}" value=""></ion-input>
 </ion-item>
-<ion-item>
+<ion-item [hidden]="ushow">
 <ion-label >Enter Your Email</ion-label>
 <ion-input type="text" [(ngModel)]="email" value=""></ion-input>
 </ion-item>
 </ion-list>
 <button ion-button block (click)="loginOrAn()">Continue</button>
-<button ion-button block color="light">or Signup</button>
+<button [hidden]="!ushow" ion-button block color="light" (click)="signupClick()" value="">or Signup</button>
 </ion-content>
