@@ -130,6 +130,25 @@ namespace wbible.Controllers.api
             //return StatusCode(HttpStatusCode.NoContent);
             return Ok("Save Successful!");
         }
+        [HttpPut("api/saveuser")]
+        //public IQueryable<BookStats> SaveVerse(int id)
+        public IActionResult SaveUser([FromBody] User user)
+        //public IActionResult SaveVerse(int id,Corpus ptext)
+        {
+            db.Users.Add(user);
+            //return Ok($"test complete {ptext}");
+            try
+            {
+               return db.SaveChanges();
+            }
+            catch (Exception x)
+            {
+                return BadRequest(x.Message);
+            }
+            //return StatusCode(HttpStatusCode.NoContent);
+            //return Ok("Save Successful!");
+        }
+
 
         // // PUT: api/Songs2/5
         // [ResponseType(typeof(void))]
