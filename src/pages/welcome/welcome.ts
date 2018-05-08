@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { IonicPage, NavController, NavParams } from 'ionic-angular';
 import { DatasvcProvider, User } from '../../providers/datasvc/datasvc';
+//import { isTrueProperty } from 'ionic-angular/util/util';
 
 /**
  * Generated class for the WelcomePage page.
@@ -11,16 +12,17 @@ import { DatasvcProvider, User } from '../../providers/datasvc/datasvc';
 
 @IonicPage()
 @Component({
-  selector: 'page-welcome',
+  selector: 'welcome',
   templateUrl: 'welcome.html',
 })
 export class WelcomePage {
 
   usernames:User[];
   emails:string[];
-  email:string;
+  email:string; 
   username:string;
   ustyle:string;
+  ushow:boolean = true;
 
   constructor(private ds:DatasvcProvider, public navCtrl: NavController, public navParams: NavParams) {
     //this.ds.getData('https://jsonplaceholder.typicode.com/posts').subscribe((data)=>{
@@ -42,7 +44,12 @@ export class WelcomePage {
     console.log('continue')
     this.ustyle="red"
     //window.location.href="https://selene.hud.ac.uk/u1273400/www/vwbibled";
+  }
 
+  signupClick(){
+    console.log('signup')
+    this.email="Please enter your email"
+    this.ushow= !this.ushow;
   }
 
 }
