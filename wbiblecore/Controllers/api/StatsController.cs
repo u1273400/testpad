@@ -139,7 +139,7 @@ namespace wbible.Controllers.api
             //return Ok($"test complete {ptext}");
             try
             {
-               return db.SaveChanges();
+               return Ok(db.SaveChanges());
             }
             catch (Exception x)
             {

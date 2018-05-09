@@ -17,23 +17,28 @@ import { DatasvcProvider, User } from '../../providers/datasvc/datasvc';
 })
 export class WelcomePage {
 
-  usernames:User[];
+  users:User[];
   emails:string[];
-  email:string; 
-  username:string;
+  email:string='';
+  username:string='';
   ustyle:string;
   ushow:boolean = true;
+  emsg:string
+  cstyle=function(){
+    // if(this.username.trim().length==0 || this.email.trim().length==0)
+    //   this.ustyle='black';
+    return this.ustyle
+  }
 
   constructor(private ds:DatasvcProvider, public navCtrl: NavController, public navParams: NavParams) {
     //this.ds.getData('https://jsonplaceholder.typicode.com/posts').subscribe((data)=>{
     this.ds.getData('assets/app.config.json').subscribe((data)=>{
-        ds.baseurl=data.islocalhost?data.lurl:data.rurl;
-        this.ds.getData(ds.baseurl+'allusers').subscribe((data)=>{
+        this.ds.baseurl=data.islocalhost?data.lurl:data.rurl;
+        this.ds.getData(this.ds.baseurl+'allusers').subscribe((data)=>{
             console.log(data);
-            this.usernames=data;
+            this.users=data;
         });
     });
-    this.username="Please enter your user name"
   }
 
   ionViewDidLoad() {
@@ -41,16 +46,54 @@ export class WelcomePage {
   }
 
   loginOrAn(){
-    console.log('continue')
-    this.ustyle="red"
-    //window.location.href="https://selene.hud.ac.uk/u1273400/www/vwbibled";
+    if(this.validated()){
+      window.location.href="https://selene.hud.ac.uk/u1273400/www/vwbibled";
+    }
   }
 
   signupClick(){
-    console.log('signup')
-    this.email="Please enter your email"
-    this.ushow= !this.ushow;
+    if(this.email.length==0){
+      this.ushow= !this.ushow;
+      return;
+    }
+    let data={userid:this.username,email:this.email,hash:'1',active:true,role:0}
+    if(this.svalidated()){
+        this.ds.saveData(this.ds.baseurl+'saveuser',data).subscribe((data)=>{
+            console.log(data);
+        });
+      window.location.href="https://selene.hud.ac.uk/u1273400/www/vwbibled";
+    }
   }
 
+  svalidated(){
+    this.ustyle="red";
+    if(this.username.trim().length===0 || this.username=="No User Name Entered"){
+      this.username="No User Name Entered";
+      return false;
+    }
+    if(this.email.trim().length===0 || this.username=="No Email Entered"){
+      this.email="No Email Entered";
+      return false;
+    }
+    if(this.users.find(o => o.userid === this.username)){
+      this.username="username already exists please choose another";
+      return false;
+    }
+    if(this.users.find(o => o.email === this.email)){
+      this.email="Email already exists please choose another";
+      return false;
+    }
+    this.ustyle="black";
+    return true;
+  }
+  validated(){
+    this.ustyle="black";
+    if(this.users.find(o => o.userid === this.username)){
+      return true;
+    }
+    this.username="The user does not exist";
+    this.ustyle="red";
+    return false;
+  }
 }
 
