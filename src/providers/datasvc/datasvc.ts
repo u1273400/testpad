@@ -22,6 +22,9 @@ export class DatasvcProvider {
   public getData(feedUrl:string):Observable<any>{
     return this.http.get(feedUrl).map(res => res.json());
   }
+  public saveData(feedUrl:string, data:User):Observable<any>{
+    return this.http.put(feedUrl,data).map(res => res.json());
+  }
 
 }
 
@@ -32,3 +35,4 @@ export interface User{
   active:boolean,
   role:number
 }
+

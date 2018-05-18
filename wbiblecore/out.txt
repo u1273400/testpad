@@ -1,0 +1,7 @@
+Valid NEST response built from a successful low level call on POST: /bv/bible_verses/_search?typed_keys=true
+2
+“Biebele sime ini pirime nwo Tamuno Be biariye mie
+                   dokitein-apu ma;
+        Tamuno Be miese ani beinma ini na deinkorobia!
+“Biebele sime ini pirime nwo buiderimapu ma;
+        Tamuno Be bereni ye mi inia baralabia!
