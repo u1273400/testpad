@@ -9,6 +9,7 @@ using wbible.DataContexts;
 using System.Collections;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
+using Nest;
 
 //using System.IO;
 //using Newtonsoft.Json;
@@ -39,7 +40,10 @@ namespace wbible
                     case "p2s":
                         punc2sents();
                         break;
-                    
+                    case "es1":
+                        es_uploader();
+                        break;
+
                 }
             }
         }
@@ -57,7 +61,7 @@ namespace wbible
                             if(bch.Count>0){
                                 //if(!Regex.Match(getchars[i], @"^[a-zA-Z]*$", RegexOptions.IgnoreCase).Success)
                                     //Console.WriteLine($"Found {getchars[i]}..Replacing with {bch[0]} ...");
-                                getchars[i]=bch[0];                           
+                                getchars[i]=bch[0];
                             }
                         }var new_word1=String.Join("",getchars)+" ";
                         var new_word="";
@@ -88,7 +92,7 @@ namespace wbible
                             if(bch.Count>0){
                                 //if(!Regex.Match(getchars[i], @"^[a-zA-Z]*$", RegexOptions.IgnoreCase).Success)
                                     //Console.WriteLine($"Found {getchars[i]}..Replacing with {bch[0]} ...");
-                                getchars[i]=bch[0];                           
+                                getchars[i]=bch[0];
                             }
                         }var new_word1=String.Join("",getchars)+" ";
                         var new_word="";
@@ -190,7 +194,7 @@ namespace wbible
             foreach (var verse in data)
             {
                 Console.WriteLine($"{book} {ch}:{sver} >> {verse.Substring(0,verse.Length>25?25:verse.Length)} [{img}, {img2}]");
-                var corpus = new Corpus { 
+                var corpus = new Corpus {
                     BookStatsId = id,
                     CText = verse,
                     Chapt = ch,
@@ -200,22 +204,121 @@ namespace wbible
                     Image2=img2
                     };
                 db.Corpus.Add(corpus);
-                if(WriteDB)db.SaveChanges();                
+                if(WriteDB)db.SaveChanges();
             }
         }
-        static void sphinx_adaptt(string[] lines){
-            StringBuilder sb= new StringBuilder();
-            // var test="(chp01_00010 \"after much thought i decided that i was a person fitted to furnish to mankind this spectacle . \")";
-            // Console.WriteLine(test.Split()[0].Substring(1)+"\n"+test.Split()[1].Substring(1));
-            // Console.WriteLine(test.Split('"')[0]+"\n"+test.Split('"')[1]);
-            //var i=0;
-            foreach (var line in lines)
-            {
-                sb.AppendLine("<s>"+line.Split('"')[1]+"</s>"+line.Split('"')[0].Trim()+")");
-                //sb.AppendLine(line.Split('"')[0].Trim().Substring(1));
-                //Console.WriteLine(line);
+        static void es_uploader(){
+            //var node = new Uri("http://myserver:9200");
+            //var settings = new ConnectionSettings(node);
+            var settings = new ConnectionSettings(new Uri("http://gaia.hud.ac.uk:9200"))
+              .DefaultIndex("bv");
+            var client = new ElasticClient(settings);
+            bool WriteDB=false; int sver=1, ch=1,ec=1,ev=1;
+            string sb="matt",book="";
+            var conf = File.ReadAllLines("v2db.conf");
+            foreach(var line in conf){
+                //Console.Write(line);
+                var vars=line.Split('=');
+                switch(vars[0].ToLower()){
+                    case "save2db":
+                        WriteDB=(vars[1].ToLower().Equals("true"))?true:false;break;
+                    case "book":
+                        book=vars[1];break;
+                    case "sb":
+                        sb=vars[1];break;
+                    case "ch":
+                        ch=Convert.ToInt32(vars[1]);break;
+                    case "sver":
+                        sver=Convert.ToInt32(vars[1]);break;
+                    case "ec":
+                        ec=Convert.ToInt32(vars[1]);break;
+                    case "ev":
+                        ev=(vars[1].Length>0 && vars[1]!=null)?Convert.ToInt32(vars[1]):0;break;
+                }
             }
-            Console.Write(sb.ToString());
+            // var searchResponse = client.Search<es_verse_img>(s => s
+            //     .AllTypes()
+            //     .From(0)
+            //     .Size(2)
+            //     .Query(q => q
+            //         .Match(m => m
+            //             .Field(im => im.book)
+            //             .Query(sb)
+            //         )
+            //     )
+            // );
+            var res = (ev==0)?client.Search<bible_verses>(s => s
+                .From(0)
+                .Size(1000)
+                .Sort(ss => ss
+                    .Ascending(p => p.chno)
+                    .Ascending(p => p.vno)
+                )
+                .Query(q => q
+                    .Match(m => m
+                        .Field(v => v.bookcode)
+                        .Query(sb)
+                    ) && +q
+                    .Range(r => r
+                        .Field(v => v.chno)
+                        .GreaterThanOrEquals(ch)
+                        .LessThanOrEquals(ec>=ch?ec:ch)
+                    )
+                )
+            ):client.Search<bible_verses>(s => s
+                .Size(1000)
+                .Sort(ss => ss
+                    .Ascending(p => p.chno)
+                    .Ascending(p => p.vno)
+                )
+               .Query(q => q
+                    .Match(m => m
+                        .Field(v => v.bookcode)
+                        .Query(sb)
+                    ) && q
+                    .Match(m => m
+                        .Field(v => v.chno)
+                        .Query(ch.ToString())
+                    ) && +q
+                    .Range(r => r
+                        .Field(v => v.vno)
+                        .GreaterThanOrEquals(sver)
+                        .LessThanOrEquals(ev>=sver?ev:sver)
+                    )
+                )
+            );
+            // var res = client.GetSource("_sql",s => s
+            //     .Add("sql","select * from bv where bookcode='matt' limit 1")
+            // );
+            //var verses =new bible_verses[res.Hits.Count()];
+            //res.Documents.CopyTo(verses,0);
+            IReadOnlyList<bible_verses> verses=(IReadOnlyList<bible_verses>)res.Documents;
+            int id = (from xx in db.Stats where xx.BookCode==book select xx.BookStatsId).SingleOrDefault();
+            Console.WriteLine($"sver={sver}, ev={ev}");
+            if (res.Hits.Count()==0){
+                Console.WriteLine("Nothing returned! Did you select the right book?");
+                return;
+            }
+            if (id==null || !verses[0].book.ToLower().Equals(book.ToLower())){
+                Console.WriteLine("Invalid Book Selection!");
+                return;
+            }
+            foreach (var bv in verses)
+            {
+                //bv=v.Source
+                Console.WriteLine((WriteDB?"":"!!")+$"{book} {bv.chno}:{bv.vno} >> {bv.verse.Substring(0,bv.verse.Length>25?25:bv.verse.Length)}[{bv.img1},{bv.img2}]"+(WriteDB?"-done!":""));
+                var corpus = new Corpus {
+                    BookStatsId = id,
+                    CText = bv.verse,
+                    Chapt = bv.chno,
+                    Verse = bv.vno,
+                    ReadersId=1,
+                    Image=bv.img1,
+                    Image2=bv.img2
+                    };
+                db.Corpus.Add(corpus);
+                if(WriteDB)db.SaveChanges();
+            }
         }
         static void LIUMConvert(string[] lines){
             //StringBuilder sb= new StringBuilder();
@@ -247,8 +350,8 @@ namespace wbible
                         myProcess.StartInfo.Arguments="palisa.wav dtrim/"+ fn[j]+".wav trim "+spt[j]+" "+dur[j]+" >> dtrim.log";
                         myProcess.StartInfo.RedirectStandardOutput = true;
                         myProcess.Start();
-                        // This code assumes the process you are starting will terminate itself. 
-                        // Given that is is started without a window so you cannot terminate it 
+                        // This code assumes the process you are starting will terminate itself.
+                        // Given that is is started without a window so you cannot terminate it
                         // on the desktop, it must terminate itself or you can do it programmatically
                         // from this application using the Kill method.
                         string output = myProcess.StandardOutput.ReadToEnd();
