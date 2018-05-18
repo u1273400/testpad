@@ -58,10 +58,11 @@ export class WelcomePage {
     }
     let data={userid:this.username,email:this.email,hash:'1',active:true,role:0}
     if(this.svalidated()){
+        console.log('saving '+JSON.stringify(data));
         this.ds.saveData(this.ds.baseurl+'saveuser',data).subscribe((data)=>{
             console.log(data);
         });
-      window.location.href="https://selene.hud.ac.uk/u1273400/www/vwbibled";
+      //window.location.href="https://selene.hud.ac.uk/u1273400/www/vwbibled";
     }
   }
 
